@@ -26,8 +26,8 @@ export const Header = () => {
             <li><a rel="noopener noreferrer" href="#" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Link 4</a></li>
           </ul>
           <div className="items-center flex-shrink-0 hidden lg:flex">
-            <button className="self-center px-8 py-3 rounded">Sign in</button>
-            <button className="self-center px-8 py-3 font-semibold rounded dark:bg-violet-400 dark:text-gray-900">Sign up</button>
+            <a href="/login"><button className="self-center px-8 py-3 rounded">Sign in</button></a>
+            <a href="/signup"><button className="self-center px-8 py-3 font-semibold rounded dark:bg-violet-400 dark:text-gray-900">Sign up</button></a>
           </div>
         </div>
       </div>
