@@ -7,21 +7,21 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "users") // Changed table name to lowercase and plural form
+@Table(name = "user")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id") // Changed column name to snake_case
+    @Column(name = "user_id")
     private int id;
 
-    @Column(name = "name") // Changed column name to snake_case
-    private String Name; // Changed variable name to camelCase
+    @Column(name = "name")
+    private String Name;
 
-    @Column(name = "username", unique = true) // Added unique constraint
+    @Column(name = "username", unique = true)
     private String username;
 
-    @Column(name = "email", unique = true) // Added unique constraint
+    @Column(name = "email", unique = true)
     private String email;
 
     @Column(name = "password")
@@ -34,6 +34,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "group_id")
     )
     private List<Groups> groups;
+
 
 }
 

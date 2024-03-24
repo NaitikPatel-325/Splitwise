@@ -20,7 +20,7 @@ export const Header = () => {
         </button>
         <div className="lg:flex hidden">
           <ul className="flex items-center space-x-4">
-            <li><a rel="noopener noreferrer" href="#" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Link 1</a></li>
+            <li><a rel="noopener noreferrer" href="Home" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Home</a></li>
             <li><a rel="noopener noreferrer" href="#" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Link 2</a></li>
             <li><a rel="noopener noreferrer" href="#" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Link 3</a></li>
             <li><a rel="noopener noreferrer" href="#" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Link 4</a></li>

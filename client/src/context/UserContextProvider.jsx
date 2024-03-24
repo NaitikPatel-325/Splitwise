@@ -8,28 +8,28 @@ export const UserContextProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [jwt, setJwt] = React.useState("");
 
-  console.log("Context Value:", { username, isLoggedIn, jwt });
-
-  const fetchUserData = async () => {
-    try {
-      const token = sessionStorage.getItem("jwt"); 
-      if (token) {
-        setJwt(token);
-
-        const response = await axios.get("http://localhost:8080/user/data", {
+  const fetchUserData = () => {
+    const token = sessionStorage.getItem("jwt");
+    if (token) {
+      setJwt(token);
+  
+      axios
+        .get("http://localhost:8080/user/data", {
           headers: {
             Authorization: `Bearer ${token}`
           }
+        })
+        .then(response => {
+          setUsername(response.data.username);
+          setIsLoggedIn(true);
+          console.log("User data fetched:", response.data);
+        })
+        .catch(error => {
+          console.error("Error fetching user data:", error);
         });
-
-        setUsername(response.data.username);
-        setIsLoggedIn(true);
-        console.log("User data fetched:", response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
     }
   };
+  
 
   useEffect(() => {
     fetchUserData();

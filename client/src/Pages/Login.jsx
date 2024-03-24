@@ -1,6 +1,29 @@
 import React from 'react';
+import axios from 'axios';
 
 export const Login = () => {
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+
+  const handleLogin = (e) => {
+    e.preventDefault(); // Prevent the default form submission behavior
+
+    axios.post('http://localhost:8080/user/login', {
+      email: email,
+      password: password,
+    })
+    .then(response => {
+      sessionStorage.setItem("jwt", response.data);
+      setIsLoggedIn(true);
+      setUsername(response.data.username);
+      console.log(response.data);
+      setJwt(response.data);
+    })
+    .catch(error => {
+      console.error("Error logging in:", error);
+    });
+  }
+
   return (
     <div>
       <a href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
@@ -25,8 +48,8 @@ export const Login = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 tracking-wide">Email</label>
                   <input
-                      className=" w-full text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400"
-                      type="email" placeholder="mail@gmail.com"/>
+                      className="w-full text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400"
+                      type="email" onChange={(e)=>setEmail(e.target.value)} placeholder="mail@gmail.com"/>
                 </div>
                 <div className="space-y-2">
                   <label className="mb-5 text-sm font-medium text-gray-700 tracking-wide">
@@ -34,7 +57,7 @@ export const Login = () => {
                   </label>
                   <input
                       className="w-full content-center text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400"
-                      type="password" placeholder="Enter your password"/>
+                      type="password" placeholder="Enter your password" onChange={(e)=>setPassword(e.target.value)} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
@@ -51,7 +74,7 @@ export const Login = () => {
                   </div>
                 </div>
                 <div>
-                  <button type="submit"
+                  <button type="submit" onClick={handleLogin}
                           className="w-full flex justify-center bg-green-400  hover:bg-green-500 text-gray-100 p-3  rounded-full tracking-wide font-semibold  shadow-lg cursor-pointer transition ease-in duration-500">
                     Sign in
                   </button>

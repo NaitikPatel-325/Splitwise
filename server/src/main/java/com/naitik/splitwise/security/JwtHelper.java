@@ -14,9 +14,7 @@ import java.util.function.Function;
 @Component
 public class JwtHelper {
 
-    //requirement :
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
-
     //    public static final long JWT_TOKEN_VALIDITY =  60;
     private String secretKey = "afafasfafafasfasfasfafacasdasfasxASFACASDFACASDFASFASFDAFASFASDAADSCSDFADCVSGCFVADXCcadwavfsfarvf";
 
@@ -37,7 +35,7 @@ public class JwtHelper {
 
     //for retrieveing any information from token we will need the secret key
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
     }
 
     //check if the token has expired
@@ -61,7 +59,7 @@ public class JwtHelper {
 
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-                .signWith(SignatureAlgorithm.HS512, secret).compact();
+                .signWith(SignatureAlgorithm.HS512, secretKey).compact();
     }
 
     //validate token

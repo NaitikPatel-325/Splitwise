@@ -12,7 +12,9 @@ import com.naitik.splitwise.security.JwtHelper;
 import com.naitik.splitwise.entity.User;
 import com.naitik.splitwise.service.UserService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -22,16 +24,25 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+
     private AuthenticationManager authenticationManager;
 
     @Autowired
     private JwtHelper jwtHelper;
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginUser) {
+        System.out.println(loginUser);
+
+        ResponseEntity<User> user = userService.getUserByEmailAndPassword(loginUser.getEmail(), loginUser.getPassword());
+
+        System.out.println(user.getBody());
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+        }
         try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginUser.getUsername(), loginUser.getPassword()));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getBody().getUsername(), user.getBody().getPassword()));
+            System.out.println("Hii1" + user.getBody().getUsername() + " " + user.getBody().getPassword() + " " + authenticationManager);
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
@@ -39,7 +50,11 @@ public class UserController {
         final UserDetails userDetails = userService.loadUserByUsername(loginUser.getUsername());
         final String jwtToken = jwtHelper.generateToken(userDetails);
 
-        return ResponseEntity.ok(jwtToken);
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("jwtToken", jwtToken);
+        responseMap.put("username", loginUser.getUsername());
+
+        return ResponseEntity.ok(responseMap);
     }
 
     @GetMapping("/get")
@@ -52,14 +67,17 @@ public class UserController {
     public ResponseEntity<String> signUp(@RequestBody User newUser) {
         if (userService.userExists(newUser.getUsername())) {
 //            System.out.println("Hii2");
-            // If the user already exists, return a CONFLICT response
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists");
         }
 
-        ResponseEntity<User> savedUser = userService.addUser(newUser);
 
-        // Generate JWT token
+        ResponseEntity<User> savedUser = userService.addUser(newUser);
+        System.out.println(savedUser.getBody().getUsername());
+
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(savedUser.getBody().getUsername(), savedUser.getBody().getPassword()));
+
 //        System.out.println("Hii3");
+
         final UserDetails userDetails = userService.loadUserByUsername(savedUser.getBody().getUsername());
 //        System.out.println("Hii3");
         final String jwtToken = jwtHelper.generateToken(userDetails);
@@ -71,7 +89,9 @@ public class UserController {
     @GetMapping("/data")
     public ResponseEntity<User> getUserData(@RequestHeader("Authorization") String token) {
         String jwtToken = token.substring(7);
+        System.out.println("Hii3");
         String username = jwtHelper.extractUsername(jwtToken);
+        System.out.println("Hii3");
         ResponseEntity<User> user = userService.getUserData(username);
         return ResponseEntity.ok(user.getBody());
     }

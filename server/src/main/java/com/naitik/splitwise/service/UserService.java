@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,10 +54,26 @@ public class UserService {
         }
     }
 
-    //make this getUserData by username
     public ResponseEntity<User> getUserData(String username) {
         try {
             User user = userDao.findByUsername(username);
+            System.out.println(user + " " + username);
+            if (user != null) {
+
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<User> getUserByEmailAndPassword(String email, String password) {
+        try {
+            User user = userDao.findByEmailAndPassword(email, password);
+            System.out.println(user + " " + email + " " + password);
             if (user != null) {
                 return new ResponseEntity<>(user, HttpStatus.OK);
             } else {
@@ -69,14 +86,13 @@ public class UserService {
     }
 
     public UserDetails loadUserByUsername(String username) {
+        System.out.println(username);
+
         User user = userDao.findByUsername(username);
 
-        // Check if the user exists
         if (user == null) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
+            throw new UsernameNotFoundException(username);
         }
-
-        // Create UserDetails object with the user's information
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),

@@ -11,23 +11,35 @@ export const Register = () => {
   
   console.log(useContext(UserContext));
   
-  const { isLoggedIn, jwt, login, logout } = useContext(UserContext);
+  const { 
+    jwt,
+    setJwt,
+    setIsLoggedIn,
+    setUsername } = useContext(UserContext);
 
-  const handleRegister = async (e) => {
-    e.preventDefault(); 
-    try {
-      const response = await axios.post('http://localhost:8080/user/signup', {
+    const handleRegister = (e) => {
+      e.preventDefault(); 
+    
+      axios.post('http://localhost:8080/user/signup', {
         name: name,
         email: email,
         password: password,
         confirmPassword: confirmPassword,
         username: user
-      }); 
-      console.log(response.data);
-    } catch (error) {
-      console.log(error);
+      })
+      .then(response => {
+        sessionStorage.setItem("jwt", response.data);
+        setIsLoggedIn(true);
+        setUsername(user);
+        console.log(response.data);
+        setJwt(response.data);
+
+      })
+      .catch(error => {
+        console.log(error);
+      });
     }
-  }
+    
 
   return (
     <div>
