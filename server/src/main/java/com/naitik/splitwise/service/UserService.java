@@ -19,6 +19,7 @@ public class UserService {
     @Autowired
     UserDao userDao;
 
+
     public ResponseEntity<User> getUser(String username, String password) {
         try {
             User user = userDao.findByUsernameAndPassword(username, password);
@@ -73,7 +74,7 @@ public class UserService {
     public ResponseEntity<User> getUserByEmailAndPassword(String email, String password) {
         try {
             User user = userDao.findByEmailAndPassword(email, password);
-            System.out.println(user + " " + email + " " + password);
+//            System.out.println(user + " " + email + " " + password);
             if (user != null) {
                 return new ResponseEntity<>(user, HttpStatus.OK);
             } else {
@@ -86,7 +87,7 @@ public class UserService {
     }
 
     public UserDetails loadUserByUsername(String username) {
-        System.out.println(username);
+        System.out.println(username + "in loadUserByUsername");
 
         User user = userDao.findByUsername(username);
 
@@ -100,8 +101,10 @@ public class UserService {
         );
     }
 
-
-    public boolean userExists(String username) {
-        return userDao.findByUsername(username) != null;
+    public boolean existsByEmail(String email) {
+        return userDao.existsByEmail(email);
+    }
+    public boolean existsByUsername(String username) {
+        return userDao.existsByUsername(username);
     }
 }

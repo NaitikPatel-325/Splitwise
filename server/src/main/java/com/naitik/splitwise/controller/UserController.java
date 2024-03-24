@@ -1,100 +1,126 @@
 package com.naitik.splitwise.controller;
-
+import com.naitik.splitwise.entity.Role;
+import com.naitik.splitwise.entity.URole;
+import com.naitik.splitwise.entity.User;
+import com.naitik.splitwise.payLoad.Request.SignupRequest;
+import com.naitik.splitwise.payLoad.Response.MessageResponse;
+import com.naitik.splitwise.daojpa.Roledao;
+import com.naitik.splitwise.daojpa.UserDao;
+import com.naitik.splitwise.payLoad.Request.LoginRequest;
+import com.naitik.splitwise.payLoad.Response.UserInfoResponse;
+import com.naitik.splitwise.security.jwt.JwtUtils;
+import com.naitik.splitwise.security.services.UserDetailsImpl;
+import com.naitik.splitwise.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import com.naitik.splitwise.security.JwtHelper;
-import com.naitik.splitwise.entity.User;
-import com.naitik.splitwise.service.UserService;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 @RequestMapping("/user")
 public class UserController {
 
     @Autowired
-    private UserService userService;
-
-
-    private AuthenticationManager authenticationManager;
+    AuthenticationManager authenticationManager;
 
     @Autowired
-    private JwtHelper jwtHelper;
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User loginUser) {
-        System.out.println(loginUser);
+    private UserService UserService;
 
-        ResponseEntity<User> user = userService.getUserByEmailAndPassword(loginUser.getEmail(), loginUser.getPassword());
+    @Autowired
+    private Roledao roleRepository;
 
-        System.out.println(user.getBody());
+    @Autowired
+    PasswordEncoder encoder;
 
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
-        }
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getBody().getUsername(), user.getBody().getPassword()));
-            System.out.println("Hii1" + user.getBody().getUsername() + " " + user.getBody().getPassword() + " " + authenticationManager);
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
-        }
+    @Autowired
+    private JwtUtils jwtUtils;
 
-        final UserDetails userDetails = userService.loadUserByUsername(loginUser.getUsername());
-        final String jwtToken = jwtHelper.generateToken(userDetails);
+    @PostMapping("/signin")
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("jwtToken", jwtToken);
-        responseMap.put("username", loginUser.getUsername());
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
-        return ResponseEntity.ok(responseMap);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .body(new UserInfoResponse(userDetails.getId(),
+                        userDetails.getUsername(),
+                        userDetails.getEmail(),
+                        roles));
     }
 
-    @GetMapping("/get")
-    public ResponseEntity<List<User>> getUser() {
-        ResponseEntity<List<User>> alluser = userService.getUsers();
-        return alluser;
-    }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signUp(@RequestBody User newUser) {
-        if (userService.userExists(newUser.getUsername())) {
-//            System.out.println("Hii2");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists");
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        if (UserService.existsByUsername(signUpRequest.getUsername())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
+        if (UserService.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+        }
 
-        ResponseEntity<User> savedUser = userService.addUser(newUser);
-        System.out.println(savedUser.getBody().getUsername());
+        User user = new User(signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                encoder.encode(signUpRequest.getPassword()));
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(savedUser.getBody().getUsername(), savedUser.getBody().getPassword()));
+        Set<String> strRoles = signUpRequest.getRole();
+        Set<Role> roles = new HashSet<>();
 
-//        System.out.println("Hii3");
+        if (strRoles == null) {
+            Role userRole = roleRepository.findByName(URole.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roles.add(userRole);
+        } else {
+            strRoles.forEach(role -> {
+                switch (role) {
+                    case "admin":
+                        Role adminRole = roleRepository.findByName(URole.ROLE_ADMIN)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(adminRole);
 
-        final UserDetails userDetails = userService.loadUserByUsername(savedUser.getBody().getUsername());
-//        System.out.println("Hii3");
-        final String jwtToken = jwtHelper.generateToken(userDetails);
-//        System.out.println(jwtToken);
-        // Return the JWT token in the response body
-        return ResponseEntity.ok(jwtToken);
+                        break;
+                    default:
+                        Role userRole = roleRepository.findByName(URole.ROLE_USER)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(userRole);
+                }
+            });
+        }
+
+        user.setRoles(roles);
+        UserService.addUser(user);
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-    @GetMapping("/data")
-    public ResponseEntity<User> getUserData(@RequestHeader("Authorization") String token) {
-        String jwtToken = token.substring(7);
-        System.out.println("Hii3");
-        String username = jwtHelper.extractUsername(jwtToken);
-        System.out.println("Hii3");
-        ResponseEntity<User> user = userService.getUserData(username);
-        return ResponseEntity.ok(user.getBody());
+    @PostMapping("/signout")
+    public ResponseEntity<?> logoutUser() {
+        ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(new MessageResponse("You've been signed out!"));
     }
-
 }
 

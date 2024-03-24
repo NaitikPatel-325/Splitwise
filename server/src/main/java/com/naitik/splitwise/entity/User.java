@@ -3,7 +3,10 @@ package com.naitik.splitwise.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import com.naitik.splitwise.entity.Groups;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -27,6 +30,13 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
+
+
     @ManyToMany
     @JoinTable(
             name = "user_groups",
@@ -36,7 +46,13 @@ public class User {
     private List<Groups> groups;
 
 
+    public User(String username, String email, String encode) {
+        this.username = username;
+        this.email = email;
+        this.password = encode;
+    }
 }
+
 
 //Users Table:
 //
