@@ -1,5 +1,6 @@
 package com.naitik.splitwise;
 
+import com.naitik.splitwise.security.jwt.AuthEntryPointJwt;
 import com.naitik.splitwise.security.jwt.AuthTokenFilter;
 import com.naitik.splitwise.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
     UserDetailsServiceImpl userDetailsService;
 
     @Autowired
-    private com.ddu.ce.tournament.security.jwt.AuthEntryPointJwt unauthorizedHandler;
+    private AuthEntryPointJwt unauthorizedHandler;
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {

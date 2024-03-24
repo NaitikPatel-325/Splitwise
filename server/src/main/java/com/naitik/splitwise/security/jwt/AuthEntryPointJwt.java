@@ -1,4 +1,4 @@
-package com.ddu.ce.tournament.security.jwt;
+package com.naitik.splitwise.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
