@@ -62,6 +62,7 @@ public class WebSecurityConfig {
                         auth.requestMatchers("/user/signup").permitAll()
                                 .requestMatchers("/user/signin").permitAll()
                                 .requestMatchers("/user/data").permitAll()
+                                .requestMatchers("/user/check/*").permitAll()
                                 .anyRequest().authenticated()
                 );
 

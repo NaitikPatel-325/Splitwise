@@ -154,6 +154,16 @@ public class UserController {
         Long userId = userDetails.getId();
         User user = UserService.getUserById(userId);
         return ResponseEntity.ok(new UserInfoResponse(user.getId(), user.getUsername(), user.getEmail(), user.getGroups(), token));
+    }
+
+    @GetMapping("/check/'${username}'")
+    public ResponseEntity<?> getUserIsExist(@PathVariable String username) {
+        if (UserService.existsByUsername(username)) {
+            return ResponseEntity.ok(new MessageResponse("User is exist"));
         }
+
+        return ResponseEntity.ok(new MessageResponse("User is Not Exist"));
+    }
+
 
 }

@@ -14,7 +14,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="dark:bg-gray-800 dark:text-gray-100">
+    <header className="dark:bg-zinc-950 dark:text-gray-100">
       <div className="container flex justify-between items-center h-16 mx-auto">
         <a rel="noopener noreferrer" href="#" aria-label="Back to homepage" className="flex items-center p-2">
           {/* logo */}
