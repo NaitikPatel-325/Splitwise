@@ -45,47 +45,6 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<List<User>> getUsers() {
-        try {
-            List<User> users = userDao.findAll();
-            return new ResponseEntity<>(users, HttpStatus.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    public ResponseEntity<User> getUserData(String username) {
-        try {
-            User user = userDao.findByUsername(username);
-            System.out.println(user + " " + username);
-            if (user != null) {
-
-                return new ResponseEntity<>(user, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    public ResponseEntity<User> getUserByEmailAndPassword(String email, String password) {
-        try {
-            User user = userDao.findByEmailAndPassword(email, password);
-//            System.out.println(user + " " + email + " " + password);
-            if (user != null) {
-                return new ResponseEntity<>(user, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
     public UserDetails loadUserByUsername(String username) {
         System.out.println(username + "in loadUserByUsername");
 
@@ -102,9 +61,15 @@ public class UserService {
     }
 
     public boolean existsByEmail(String email) {
+
         return userDao.existsByEmail(email);
     }
     public boolean existsByUsername(String username) {
+
         return userDao.existsByUsername(username);
+    }
+
+    public User getUserById(Long userId) {
+        return userDao.findById(userId).orElse(null);
     }
 }

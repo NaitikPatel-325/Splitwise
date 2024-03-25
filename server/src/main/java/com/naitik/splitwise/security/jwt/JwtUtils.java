@@ -20,7 +20,7 @@ import java.util.Date;
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("Na1t1k@1234")
+    @Value("Na1t1k=============================12345=====================")
     private String jwtSecret;
 
     @Value("86400000")
@@ -28,6 +28,9 @@ public class JwtUtils {
 
     @Value("jwtCookie")
     private String jwtCookie;
+
+    private String jwtToken;
+
 
     public String getJwtFromCookies(HttpServletRequest request) {
         Cookie cookie = WebUtils.getCookie(request, jwtCookie);
@@ -40,12 +43,13 @@ public class JwtUtils {
 
     public ResponseCookie generateJwtCookie(UserDetailsImpl userPrincipal) {
         String jwt = generateTokenFromUsername(userPrincipal.getUsername());
-        ResponseCookie cookie = ResponseCookie.from(jwtCookie, jwt).path("/api").maxAge(24 * 60 * 60).httpOnly(true).build();
+        jwtToken = jwt;
+        ResponseCookie cookie = ResponseCookie.from(jwtCookie, jwt).path("/user").maxAge(24 * 60 * 60).httpOnly(true).build();
         return cookie;
     }
 
     public ResponseCookie getCleanJwtCookie() {
-        ResponseCookie cookie = ResponseCookie.from(jwtCookie, null).path("/api").build();
+        ResponseCookie cookie = ResponseCookie.from(jwtCookie, null).path("/user").build();
         return cookie;
     }
 
@@ -73,6 +77,12 @@ public class JwtUtils {
         }
 
         return false;
+    }
+
+    public String getJwtToken() {
+        if(jwtCookie!=null)
+            return jwtToken;
+        return null;
     }
 
     public String generateTokenFromUsername(String username) {

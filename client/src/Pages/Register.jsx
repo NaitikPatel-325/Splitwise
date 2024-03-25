@@ -6,38 +6,31 @@ export const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
   const [user, setUser] = useState('');
   
-  console.log(useContext(UserContext));
-  
-  const { 
-    jwt,
-    setJwt,
-    setIsLoggedIn,
-    setUsername } = useContext(UserContext);
-
     const handleRegister = (e) => {
-      e.preventDefault(); 
-    
-      axios.post('http://localhost:8080/user/signup', {
-        name: name,
-        email: email,
-        password: password,
-        confirmPassword: confirmPassword,
-        username: user
-      })
-      .then(response => {
-        sessionStorage.setItem("jwt", response.data);
-        setIsLoggedIn(true);
-        setUsername(user);
-        console.log(response.data);
-        setJwt(response.data);
+      if(password !== confirmPassword){
+        alert("Passwords do not match");
+        return;
 
-      })
-      .catch(error => {
-        console.log(error);
-      });
+      }
+      else{
+
+        e.preventDefault(); 
+    
+        axios.post('http://localhost:8080/user/signup', {
+          email: email,
+          password: password,
+          username: user,
+          Role: ""
+        })
+        .then(response => {
+          console.log(response.data);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+      }
     }
     
 
@@ -63,21 +56,16 @@ export const Register = () => {
               <div className="space-y-5">
                 <form onSubmit={handleRegister} method='POST'>
                 <div className="space-y-2">
-                    <label className="mb-5 text-sm font-medium tracking-wide">
-                      Name
-                    </label>
-                    <input className="w-full content-center text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400" type="text" placeholder="Enter your Name" onChange={(e)=>{setName(e.target.value)}} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 tracking-wide">Email</label>
-                    <input className=" w-full text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400" type="email" placeholder="mail@gmail.com" onChange={(e)=>{setEmail(e.target.value)}} />
-                  </div>
-                  <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 tracking-wide">Username</label>
                   <input
                       className=" w-full text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400"
                       type="text" placeholder="Enter Your Username" onChange={(e)=>{setUser(e.target.value)}}/>
                   </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 tracking-wide">Email</label>
+                    <input className=" w-full text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400" type="email" placeholder="mail@gmail.com" onChange={(e)=>{setEmail(e.target.value)}} />
+                  </div>
+                  
                   <div className="space-y-2">
                     <label className="mb-5 text-sm font-medium tracking-wide">
                       Password

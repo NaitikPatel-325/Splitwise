@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState ,useContext} from 'react';
+import  UserContext  from '../context/create';
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const {
+    isLoggedIn
+  } = useContext(UserContext);
+  
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -20,26 +26,24 @@ export const Header = () => {
         </button>
         <div className="lg:flex hidden">
           <ul className="flex items-center space-x-4">
-            <li><a rel="noopener noreferrer" href="Home" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Home</a></li>
-            <li><a rel="noopener noreferrer" href="#" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Link 2</a></li>
-            <li><a rel="noopener noreferrer" href="#" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Link 3</a></li>
-            <li><a rel="noopener noreferrer" href="#" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Link 4</a></li>
+            <li><a rel="noopener noreferrer" href="/Home" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Home</a></li>
+            <li><a rel="noopener noreferrer" href="/dashboard" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Dashboard</a></li>
+            {isLoggedIn && <li><a rel="noopener noreferrer" href="/profile" className="flex items-center px-4 -mb-1 border-b-2 dark:border-transparent">Profile</a></li>}
           </ul>
-          <div className="items-center flex-shrink-0 hidden lg:flex">
-            <a href="/login"><button className="self-center px-8 py-3 rounded">Sign in</button></a>
+          {!isLoggedIn &&<div className="items-center flex-shrink-0 hidden lg:flex">
+             <a href="/login"><button className="self-center px-8 py-3 rounded">Sign in</button></a>
             <a href="/signup"><button className="self-center px-8 py-3 font-semibold rounded dark:bg-violet-400 dark:text-gray-900">Sign up</button></a>
           </div>
+          }
         </div>
       </div>
-      {/* Mobile Dropdown */}
       <div className={`lg:hidden ${isMenuOpen ? 'block' : 'hidden'} absolute top-16 left-0 right-0 bg-white dark:bg-gray-800 shadow-md`}>
   <ul className="flex flex-col justify-between py-4">
-    <li><a rel="noopener noreferrer" href="#" className="block px-4 py-2 text-gray-900 dark:text-gray-100 hover:text-gray-600">Link 1</a></li>
-    <li><a rel="noopener noreferrer" href="#" className="block px-4 py-2 text-gray-900 dark:text-gray-100 hover:text-gray-600">Link 2</a></li>
-    <li><a rel="noopener noreferrer" href="#" className="block px-4 py-2 text-gray-900 dark:text-gray-100 hover:text-gray-600">Link 3</a></li>
-    <li><a rel="noopener noreferrer" href="#" className="block px-4 py-2 text-gray-900 dark:text-gray-100 hover:text-gray-600">Link 4</a></li>
-    <li><a rel="noopener noreferrer" href="#" className="block px-4 py-3 rounded text-white">Sign in</a></li>
-    <li><a rel="noopener noreferrer" href="#" className="block px-4 py-3 font-semibold rounded w dark:bg-violet-400 dark:text-gray-900">Sign up</a></li>
+    <li><a rel="noopener noreferrer" href="/Home" className="block px-4 py-2 text-gray-900 dark:text-gray-100 hover:text-gray-600">Home</a></li>
+    <li><a rel="noopener noreferrer" href="/dashboard" className="block px-4 py-2 text-gray-900 dark:text-gray-100 hover:text-gray-600">dashboard</a></li>
+    {isLoggedIn && <li><a rel="noopener noreferrer" href="/profile" className="block px-4 py-2 text-gray-900 dark:text-gray-100 hover:text-gray-600">Profile</a></li>}
+    {!isLoggedIn && <li><a rel="noopener noreferrer" href="/login" className="block px-4 py-3 rounded text-white">Sign in</a></li>}
+    {!isLoggedIn && <li><a rel="noopener noreferrer" href="/signup" className="block px-4 py-3 font-semibold rounded w dark:bg-violet-400 dark:text-gray-900">Sign up</a></li>}
   </ul>
 </div>
     </header>

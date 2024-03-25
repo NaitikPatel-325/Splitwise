@@ -1,5 +1,6 @@
 package com.naitik.splitwise.security.services;
 
+import com.naitik.splitwise.entity.Groups;
 import com.naitik.splitwise.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,14 +24,19 @@ public class UserDetailsImpl implements UserDetails {
     @JsonIgnore
     private String password;
 
+    private List<Groups> groups;
+
+
     private Collection<? extends GrantedAuthority> authorities;
 
     public UserDetailsImpl(Long id, String username, String email, String password,
+                           List<Groups> groups,
                            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.groups = groups;
         this.authorities = authorities;
     }
 
@@ -44,6 +50,7 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
+                user.getGroups(),
                 authorities);
     }
 
@@ -98,5 +105,9 @@ public class UserDetailsImpl implements UserDetails {
             return false;
         UserDetailsImpl user = (UserDetailsImpl) o;
         return Objects.equals(id, user.id);
+    }
+
+    public List<Groups> getGroups() {
+        return groups;
     }
 }

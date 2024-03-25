@@ -5,7 +5,6 @@ import com.naitik.splitwise.entity.User;
 import com.naitik.splitwise.payLoad.Request.SignupRequest;
 import com.naitik.splitwise.payLoad.Response.MessageResponse;
 import com.naitik.splitwise.daojpa.Roledao;
-import com.naitik.splitwise.daojpa.UserDao;
 import com.naitik.splitwise.payLoad.Request.LoginRequest;
 import com.naitik.splitwise.payLoad.Response.UserInfoResponse;
 import com.naitik.splitwise.security.jwt.JwtUtils;
@@ -14,6 +13,7 @@ import com.naitik.splitwise.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/user")
 public class UserController {
 
@@ -50,7 +50,6 @@ public class UserController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -59,17 +58,21 @@ public class UserController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
-
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+        String jwtToken = jwtUtils.getJwtToken();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .body(new UserInfoResponse(userDetails.getId(),
                         userDetails.getUsername(),
                         userDetails.getEmail(),
-                        roles));
+                        userDetails.getGroups(),
+                        jwtToken));
     }
+
+  ;
 
 
     @PostMapping("/signup")
@@ -86,6 +89,8 @@ public class UserController {
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
 
+        System.out.println(roleRepository.findByName(URole.ROLE_USER));
+
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
@@ -100,8 +105,8 @@ public class UserController {
                         Role adminRole = roleRepository.findByName(URole.ROLE_ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(adminRole);
-
                         break;
+
                     default:
                         Role userRole = roleRepository.findByName(URole.ROLE_USER)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
@@ -116,11 +121,39 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-    @PostMapping("/signout")
-    public ResponseEntity<?> logoutUser() {
-        ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new MessageResponse("You've been signed out!"));
-    }
-}
+    @DeleteMapping("/signout")
+    public ResponseEntity<?> logoutUser(@RequestHeader("Authorization") String request) {
+    if (authenticationManager == null || !request.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
+        String token = request.substring(7);
+        if (!jwtUtils.validateJwtToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ResponseCookie jwtCookie = jwtUtils.getCleanJwtCookie();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .body(new MessageResponse("User logged out successfully!"));
+    }
+
+    @GetMapping("/data")
+    public ResponseEntity<?> getUserData( @RequestHeader("Authorization") String request) {
+        System.out.println(request);
+        if (authenticationManager == null || !request.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = request.substring(7);
+        if (!jwtUtils.validateJwtToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+        User user = UserService.getUserById(userId);
+        return ResponseEntity.ok(new UserInfoResponse(user.getId(), user.getUsername(), user.getEmail(), user.getGroups(), token));
+        }
+
+}

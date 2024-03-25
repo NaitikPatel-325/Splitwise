@@ -1,23 +1,29 @@
-import React from 'react';
+import React,{useContext} from 'react';
 import axios from 'axios';
+import  UserContext  from '../context/create';
+
 
 export const Login = () => {
-  const [email, setEmail] = React.useState("");
+  const [name, setname] = React.useState("");
   const [password, setPassword] = React.useState("");
 
+  const {
+    setIsLoggedIn,
+    Login
+  } = useContext(UserContext);
+  
   const handleLogin = (e) => {
-    e.preventDefault(); // Prevent the default form submission behavior
-
-    axios.post('http://localhost:8080/user/login', {
-      email: email,
+    e.preventDefault(); 
+    axios.post('http://localhost:8080/user/signin', {
+      username: name,
       password: password,
     })
     .then(response => {
-      sessionStorage.setItem("jwt", response.data);
+      console.log(response.data.username);
       setIsLoggedIn(true);
-      setUsername(response.data.username);
+      Login(response.data.jwtToken, response.data.username);
       console.log(response.data);
-      setJwt(response.data);
+      window.location.href = "/home";
     })
     .catch(error => {
       console.error("Error logging in:", error);
@@ -46,10 +52,10 @@ export const Login = () => {
               </div>
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 tracking-wide">Email</label>
+                  <label className="text-sm font-medium text-gray-700 tracking-wide">Username</label>
                   <input
                       className="w-full text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400"
-                      type="email" onChange={(e)=>setEmail(e.target.value)} placeholder="mail@gmail.com"/>
+                      type="text" onChange={(e)=>setname(e.target.value)} placeholder="Enter Your Username"/>
                 </div>
                 <div className="space-y-2">
                   <label className="mb-5 text-sm font-medium text-gray-700 tracking-wide">

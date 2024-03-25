@@ -22,9 +22,6 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "name")
-    private String Name;
-
     @Column(name = "username", unique = true)
     private String username;
 
@@ -48,7 +45,6 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "group_id")
     )
     private List<Groups> groups;
-
 
     public User(String username, String email, String encode) {
         this.username = username;

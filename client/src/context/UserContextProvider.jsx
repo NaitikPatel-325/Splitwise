@@ -42,18 +42,19 @@ export const UserContextProvider = ({ children }) => {
     setJwt("");
   };
 
-  const login = (jwtToken, username) => {
+  const Login = (jwtToken, username) => {
     sessionStorage.setItem("jwt", jwtToken);
     setJwt(jwtToken);
     setUsername(username);
     setIsLoggedIn(true);
+    console.log(userContextValue);
   };
 
   const userContextValue = {
     username,
     isLoggedIn,
     jwt,
-    login,
+    Login,
     logout,
     setJwt,
     setIsLoggedIn,
