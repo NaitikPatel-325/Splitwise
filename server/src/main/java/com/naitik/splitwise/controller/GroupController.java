@@ -93,7 +93,19 @@ public class GroupController {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userDetails.getId();
         User user = userService.getUserById(userId);
-
+        System.out.println("GroupController.getGroup: user = " + user);
         return ResponseEntity.ok(groupService.getGroup(user, id));
+    }
+
+    @GetMapping("/member")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<?> getGroupMembers(@RequestHeader("Authorization") String request, @RequestParam int id) {
+        System.out.println("GroupController.getGroupMembers");
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+        User user = userService.getUserById(userId);
+        System.out.println("GroupController.getGroupMembers: user = " + user);
+        return ResponseEntity.ok(groupService.getGroupMembers(user, id));
     }
 }

@@ -51,76 +51,13 @@ public class GroupService {
         }
         return null;
     }
+
+    public Object getGroupMembers(User user, int id) {
+        for (Groups group : user.getGroups()) {
+            if (group.getId() == id) {
+                return group.getUsers();
+            }
+        }
+        return null;
+    }
 }
-//        public ResponseEntity<Groups> getGroup(int id) {
-//            try {
-//                Groups group = groupDao.findById(id);
-//                if (group != null) {
-//                    return new ResponseEntity<>(group, HttpStatus.OK);
-//                } else {
-//                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//            }
-//        }
-
-//        public ResponseEntity<Groups> addUserToGroup(int groupId, int userId) {
-//            try {
-//                Groups group = groupDao.findById(groupId);
-//                User user = userDao.findById(userId);
-//                if (group != null && user != null) {
-//                    group.getUsers().add(user);
-//                    user.getGroups().add(group);
-//                    groupDao.save(group);
-//                    userDao.save(user);
-//                    return new ResponseEntity<>(group, HttpStatus.OK);
-//                } else {
-//                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//            }
-//        }
-
-//        public ResponseEntity<Group> removeUserFromGroup(int groupId, int userId) {
-//            try {
-//                Group group = groupDao.findById(groupId);
-//                User user = userDao.findById(userId);
-//                if (group != null && user != null) {
-//                    group.getUsers().remove(user);
-//                    user.getGroups().remove(group);
-//                    groupDao.save(group);
-//                    userDao.save(user);
-//                    return new ResponseEntity<>(group, HttpStatus.OK);
-//                } else {
-//                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//            }
-//        }
-
-//        public ResponseEntity<Groups> deleteGroup(int id) {
-//            try {
-//                groupDao.deleteById(id);
-//                return new ResponseEntity<>(HttpStatus.OK);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//            }
-//        }
-//
-//        public ResponseEntity<List<Groups>> getAllGroups() {
-//            try {
-//                List<Groups> groups = groupDao.findAll();
-//                return new ResponseEntity<>(groups, HttpStatus.OK);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//            }
-//        }
-

@@ -5,6 +5,7 @@ import {Login} from '../Pages/Login'
 import {Register} from '../Pages/Register'
 import {Profile} from '../Pages/Profile/Profile'
 import {Dashboard} from '../Pages/Dashboard/Dashboard'
+import {Expanses} from '../Pages/Expanse/Expanses'
 
 export const AllRoutes = () => {
   return (
@@ -14,6 +15,7 @@ export const AllRoutes = () => {
         <Route path = "/signup" element = {< Register />} />
         <Route path = "/profile" element = {<Profile />} />
         <Route path="/dashboard" element = {<Dashboard />} />
+        <Route path="/group/:id" element={<Expanses/>} />
     </Routes>
   )
 }

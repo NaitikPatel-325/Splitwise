@@ -58,7 +58,7 @@ export const Group = () => {
         }
       }).then(response => {
         console.log('Group created:', response);
-        // window.location.href = '/dashboard';
+        window.location.href = '/dashboard';
       }).catch(error => {
         console.error('Error creating group:', error);
         return false;
