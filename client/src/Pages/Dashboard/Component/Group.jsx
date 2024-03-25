@@ -5,6 +5,7 @@ import  UserContext  from '../../../context/create';
 export const Group = () => {
 
   const{
+    isloggedin,
     jwt
   } = useContext(UserContext);
 
@@ -13,7 +14,6 @@ export const Group = () => {
   const [groupName, setGroupName] = useState('');
   const [currency, setCurrency] = useState('');
   const [existingUsers, setExistingUsers] = useState([]); 
-  const [validatedParticipants, setValidatedParticipants] = useState([]); 
 
   const addParticipantInput = () => {
 
@@ -33,7 +33,6 @@ export const Group = () => {
       setCheckIndex(checkindex + 1);
       const userExists = await checkUserExistence(participants[checkindex - 1]);
       console.log('User exists:', userExists);
-      // Perform any operations based on user existence
     }
     setParticipants(newParticipants);
   };
@@ -48,28 +47,53 @@ export const Group = () => {
 
   const handleCreateGroup = async () => {
 
-    
-    const validatedParticipants = await validateParticipants();
-    setValidatedParticipants(validatedParticipants);
-
-    console.log('Create Group with validated participants:', validatedParticipants);
-  
-  };
+    if (jwt !== '') {
+      console.log('Creating group:', groupName, currency, participants, jwt);
+      axios.post('http://localhost:8080/group/add', {
+        name: groupName,
+        Currency: currency,
+        users: participants
+      }, {
+        headers: {
+          Authorization: `Bearer ${jwt}`
+        }
+      }).then(response => {
+        console.log('Group created:', response);
+        window.location.href = '/dashboard';
+      }).catch(error => {
+        console.error('Error creating group:', error);
+        return false;
+      });
+    } else {
+      alert('Please login to create a group');
+    }
+  }    
 
   const handleCancel = () => {
     window.location.href = '/dashboard';
   };
 
   const checkUserExistence = async (username) => {
-    axios.get(`http://localhost:8080/user/check/${username}`)
-    .then(response => {
-      console.log('User exists:', response.data.exists);
-      return response.data.exists;
-    })
-    .catch(error => {
-      console.error('Error checking user existence:', error);
+    if(isloggedin === false){
+      alert('Please login');
       return false;
-    });
+    }else{
+      axios.get(`http://localhost:8080/user/check/${username}`)
+      .then(response => {
+        // console.log('User exists:', response);
+
+        if(response.data[0]){
+          setExistingUsers([...existingUsers, username]);
+        }
+        else{
+          alert('User does not exist');
+        }
+      })
+      .catch(error => {
+        console.error('Error checking user existence:', error);
+        return false;
+      });
+    }
   };
 
   return (

@@ -1,18 +1,15 @@
 package com.naitik.splitwise.controller;
 
 import com.naitik.splitwise.entity.Groups;
-import com.naitik.splitwise.entity.User;
+import com.naitik.splitwise.payLoad.Response.MessageResponse;
 import com.naitik.splitwise.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/group")
 public class GroupController {
 
@@ -20,14 +17,10 @@ public class GroupController {
     private GroupService groupService;
 
     @PostMapping("/add")
-    public ResponseEntity<Groups> addGroup(@RequestBody Groups group) {
-        List<User> users = group.getUsers();
-        if (users != null) {
-            for (User user : users) {
-//                group.addUser(user);
-            }
-        }
-        return groupService.addGroup(group);
+//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<MessageResponse> addGroup(@RequestHeader("Authorization") String request, @RequestBody Groups group) {
+        System.out.println("GroupController.addGroup");
+        groupService.addGroup( group);
+        return ResponseEntity.ok(new MessageResponse("Group added successfully"));
     }
-
 }

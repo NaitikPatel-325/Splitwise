@@ -20,7 +20,12 @@ public class Groups {
     @Column(name = "group_name")
     private String groupName;
 
+    @Column(name = "currency")
+    private String Currency;
+
     @ManyToMany(mappedBy = "groups")
     private List<User> users;
+
+
 
 }

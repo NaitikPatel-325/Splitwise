@@ -16,6 +16,7 @@ public class GroupService {
     @Autowired
     private GroupDao groupDao;
 
+
     public ResponseEntity<Groups> addGroup(Groups group) {
         try {
             Groups savedGroup = groupDao.save(group);

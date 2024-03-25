@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -122,16 +123,8 @@ public class UserController {
     }
 
     @DeleteMapping("/signout")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<?> logoutUser(@RequestHeader("Authorization") String request) {
-    if (authenticationManager == null || !request.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String token = request.substring(7);
-        if (!jwtUtils.validateJwtToken(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         ResponseCookie jwtCookie = jwtUtils.getCleanJwtCookie();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
@@ -156,13 +149,14 @@ public class UserController {
         return ResponseEntity.ok(new UserInfoResponse(user.getId(), user.getUsername(), user.getEmail(), user.getGroups(), token));
     }
 
-    @GetMapping("/check/'${username}'")
+    @GetMapping("/check/{username}")
     public ResponseEntity<?> getUserIsExist(@PathVariable String username) {
+        System.out.println(username);
         if (UserService.existsByUsername(username)) {
-            return ResponseEntity.ok(new MessageResponse("User is exist"));
+            return ResponseEntity.ok(new boolean[]{true});
         }
 
-        return ResponseEntity.ok(new MessageResponse("User is Not Exist"));
+        return ResponseEntity.ok(new boolean[]{false});
     }
 
 

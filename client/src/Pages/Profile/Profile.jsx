@@ -25,6 +25,6 @@ export const Profile = () => {
   };
 
   return (
-    <button onClick={handleLogout}>Logout</button>
+    <button onClick={handleLogout} className='text-white'>Logout</button>
   );
 }

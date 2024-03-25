@@ -63,6 +63,7 @@ public class WebSecurityConfig {
                                 .requestMatchers("/user/signin").permitAll()
                                 .requestMatchers("/user/data").permitAll()
                                 .requestMatchers("/user/check/*").permitAll()
+
                                 .anyRequest().authenticated()
                 );
 
