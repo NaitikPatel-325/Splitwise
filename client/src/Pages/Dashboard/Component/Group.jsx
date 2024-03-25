@@ -46,20 +46,19 @@ export const Group = () => {
   };
 
   const handleCreateGroup = async () => {
-
     if (jwt !== '') {
       console.log('Creating group:', groupName, currency, participants, jwt);
       axios.post('http://localhost:8080/group/add', {
-        name: groupName,
-        Currency: currency,
-        users: participants
+        groupName: groupName,
+        currency: currency,
+        participants: participants
       }, {
         headers: {
           Authorization: `Bearer ${jwt}`
         }
       }).then(response => {
         console.log('Group created:', response);
-        window.location.href = '/dashboard';
+        // window.location.href = '/dashboard';
       }).catch(error => {
         console.error('Error creating group:', error);
         return false;
@@ -67,8 +66,8 @@ export const Group = () => {
     } else {
       alert('Please login to create a group');
     }
-  }    
-
+  }
+  
   const handleCancel = () => {
     window.location.href = '/dashboard';
   };

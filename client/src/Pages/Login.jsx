@@ -19,8 +19,10 @@ export const Login = () => {
       password: password,
     })
     .then(response => {
-      console.log(response.data.username);
+      console.log(response.data);
+      console.log(response.headers);
       setIsLoggedIn(true);
+      sessionStorage.setItem("jwt", response.data);
       Login(response.data.jwtToken, response.data.username);
       console.log(response.data);
       window.location.href = "/home";

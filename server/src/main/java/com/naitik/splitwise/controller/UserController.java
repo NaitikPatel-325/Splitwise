@@ -62,15 +62,18 @@ public class UserController {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
+        
 
         String jwtToken = jwtUtils.getJwtToken();
+        System.out.println("token = " + jwtToken);
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .body(new UserInfoResponse(userDetails.getId(),
+                .body(new UserInfoResponse(jwtToken,userDetails.getId(),
                         userDetails.getUsername(),
                         userDetails.getEmail(),
-                        userDetails.getGroups(),
-                        jwtToken));
+                        userDetails.getGroups()
+                        ));
     }
 
   ;
@@ -146,7 +149,7 @@ public class UserController {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userDetails.getId();
         User user = UserService.getUserById(userId);
-        return ResponseEntity.ok(new UserInfoResponse(user.getId(), user.getUsername(), user.getEmail(), user.getGroups(), token));
+        return ResponseEntity.ok(new UserInfoResponse( token,user.getId(), user.getUsername(), user.getEmail(), user.getGroups()));
     }
 
     @GetMapping("/check/{username}")

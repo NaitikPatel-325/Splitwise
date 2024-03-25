@@ -18,7 +18,7 @@ public class UserInfoResponse {
     private List<Groups> groups;
     private String jwtToken;
 
-    public UserInfoResponse(Long id, String username, String email, List<Groups> groups, String jwtToken) {
+    public UserInfoResponse( String jwtToken,Long id, String username, String email, List<Groups> groups) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -26,7 +26,7 @@ public class UserInfoResponse {
         this.jwtToken = jwtToken;
     }
 
-    public UserInfoResponse(Long id, String username, String email, List<String> roles, List<Groups> groups, String jwtToken) {
+    public UserInfoResponse( String jwtToken,Long id, String username, String email, List<String> roles, List<Groups> groups) {
         this.id = id;
         this.username = username;
         this.email = email;
