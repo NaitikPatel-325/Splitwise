@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class GroupService {
@@ -59,5 +60,22 @@ public class GroupService {
             }
         }
         return null;
+    }
+
+    public List<User> getGroupMember(Long id) {
+        return groupDao.findById(id.intValue()).orElse(null).getUsers();
+    }
+
+    public Groups getGroupByName(String name) {
+        return groupDao.findByGroupName(name);
+    }
+
+    public boolean getGroupById(Long groupId) {
+        return groupDao.existsById(groupId);
+    }
+
+    public Object deleteGroup(User user, int id) {
+                groupDao.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

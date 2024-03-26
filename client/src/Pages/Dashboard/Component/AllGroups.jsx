@@ -21,6 +21,7 @@ export const AllGroups = () => {
     })
       .then(response => {
         setGroups(response.data);
+        console.log('Groups:', response.data);
       })
       .catch(error => {
         console.error('Error fetching groups:', error);
@@ -57,7 +58,7 @@ export const AllGroups = () => {
                       state: { groupId: group.id }
                     }}
                     ref={linkRef}
-                    style={{ display: 'none' }} // Hide the link
+                    style={{ display: 'none' }} 
                   />
                 </td>
               </tr>

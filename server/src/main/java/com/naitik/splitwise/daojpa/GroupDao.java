@@ -7,4 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GroupDao extends JpaRepository<Groups, Integer> {
 
+    public Groups findByGroupName(String name);
+
+    boolean existsById(Long groupId);
 }

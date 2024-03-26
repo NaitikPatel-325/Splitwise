@@ -13,7 +13,7 @@ export const Home = () => {
   
   return (
     <div>
-      <p>Welcome {username} and {isLoggedIn} {jwt}</p>
+      <p className='text-white'>Welcome {username} and {isLoggedIn} {jwt}</p>
       <div>Home</div>
     </div>
   )

@@ -33,21 +33,18 @@ public class GroupController {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if (userDetails == null) {
-            // Handle the case where UserDetails is null
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Unauthorized access"));
         }
 
         Long userId = userDetails.getId();
 
         if (userId == null) {
-            // Handle the case where userId is null
             return ResponseEntity.badRequest().body(new MessageResponse("User ID not found"));
         }
 
         User user = userService.getUserById(userId);
 
         if (user == null) {
-            // Handle the case where user is not found
             return ResponseEntity.notFound().build();
         }
 
@@ -63,7 +60,6 @@ public class GroupController {
             if (user1 != null) {
                 groupService.addUserToGroup(user1, s);
             } else {
-                // Handle the case where user1 is not found
                 return ResponseEntity.notFound().build();
             }
         }
@@ -73,7 +69,7 @@ public class GroupController {
     }
 
 
-    @GetMapping("/get")
+    @GetMapping("/get")//groups of user
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<?> getGroups(@RequestHeader("Authorization") String request) {
         System.out.println("GroupController.getGroups");
@@ -85,7 +81,7 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getGroups(user));
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/get/{id}")//group by id for perticular
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<?> getGroup(@RequestHeader("Authorization") String request, @PathVariable int id) {
         System.out.println("GroupController.getGroup");
@@ -108,4 +104,17 @@ public class GroupController {
         System.out.println("GroupController.getGroupMembers: user = " + user);
         return ResponseEntity.ok(groupService.getGroupMembers(user, id));
     }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<?> deleteGroup(@RequestHeader("Authorization") String request, @PathVariable int id) {
+        System.out.println("GroupController.deleteGroup");
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+        User user = userService.getUserById(userId);
+        System.out.println("GroupController.deleteGroup: user = " + user);
+        return ResponseEntity.ok(groupService.deleteGroup(user, id));
+    }
+
 }

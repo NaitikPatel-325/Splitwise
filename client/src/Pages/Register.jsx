@@ -11,7 +11,6 @@ export const Register = () => {
     const handleRegister = (e) => {
       if(password !== confirmPassword){
         alert("Passwords do not match");
-        return;
 
       }
       else{
