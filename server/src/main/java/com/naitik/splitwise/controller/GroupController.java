@@ -81,7 +81,7 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getGroups(user));
     }
 
-    @GetMapping("/get/{id}")//group by id for perticular
+    @GetMapping("/get/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<?> getGroup(@RequestHeader("Authorization") String request, @PathVariable int id) {
         System.out.println("GroupController.getGroup");

@@ -12,12 +12,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
+
 @Entity
 @Table(name = "user")
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +34,15 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "expanse_contributors",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "expanse_id")
+    )
+    private List<Expanse> contributedExpanses;
+
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY ,cascade = CascadeType.ALL)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -54,6 +64,37 @@ public class User {
         this.password = encode;
     }
 
+    public List<Groups> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<Groups> groups) {
+        this.groups = groups;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public List<Groups> getUsers() {
         if (groups == null) {
@@ -62,47 +103,27 @@ public class User {
         return groups;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public List<Expanse> contributedExpanses() {
+
+        return contributedExpanses;
+    }
+
+    public void setContributedExpanses(List<Expanse> contributedExpanses) {
+        this.contributedExpanses = contributedExpanses;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }
-
-
-//Users Table:
-//
-//user_id (Primary Key)
-//username (Unique)
-
-//email (Unique)
-//password (Hashed)
-//created_at
-//updated_at
-//Groups Table:
-//
-//group_id (Primary Key)
-//group_name
-//created_by (Foreign Key referencing user_id in Users table)
-//created_at
-//updated_at
-//Group_Members Table:
-//
-//group_member_id (Primary Key)
-//group_id (Foreign Key referencing group_id in Groups table)
-//user_id (Foreign Key referencing user_id in Users table)
-//joined_at
-//updated_at
-//Expenses Table:
-//
-//expense_id (Primary Key)
-//group_id (Foreign Key referencing group_id in Groups table)
-//paid_by (Foreign Key referencing user_id in Users table)
-//amount
-//description
-//date
-//created_at
-//updated_at
-//Expense_Shares Table:
-//
-//share_id (Primary Key)
-//expense_id (Foreign Key referencing expense_id in Expenses table)
-//user_id (Foreign Key referencing user_id in Users table)
-//share_amount
-//created_at
-//updated_at

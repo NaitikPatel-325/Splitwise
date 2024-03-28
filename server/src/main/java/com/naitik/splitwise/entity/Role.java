@@ -5,9 +5,15 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.stereotype.Repository;
 
-@Data
 @Entity
 public class Role {
+    public Integer id() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,6 +22,14 @@ public class Role {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private URole name;
+
+    public URole getName() {
+        return name;
+    }
+
+    public void setName(URole name) {
+        this.name = name;
+    }
 
     public Role() {
     }

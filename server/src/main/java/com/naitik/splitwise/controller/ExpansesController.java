@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
 @CrossOrigin(origins = "http://localhost:8080")
 @RequestMapping("/group/expanses")
@@ -97,30 +98,6 @@ public class ExpansesController {
         return new ResponseEntity<>(updatedExpense, HttpStatus.OK);
     }
 
-    @GetMapping("/group/{groupId}/expensesPerUser")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<Double> getExpensesPerUserInGroup(@RequestHeader("Authorization") String request, @PathVariable Long groupId) {
-        boolean group = GroupService.getGroupById(groupId);
-        if (group ) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        Double groupExpenses = expanseService.getTotalExpensesForGroup(groupId);
-
-
-
-
-        List<User> groupMembers = GroupService.getGroupMember(groupId);
-        int numberOfUsers = groupMembers.size();
-
-        if (numberOfUsers == 0) {
-            return new ResponseEntity<>(0.0, HttpStatus.OK);
-        }
-
-        double expensesPerUser = groupExpenses / numberOfUsers;
-        return new ResponseEntity<>(expensesPerUser, HttpStatus.OK);
-    }
-
 
     @DeleteMapping("/delete/{expenseId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
@@ -131,10 +108,3 @@ public class ExpansesController {
 
 
 }
-//{
-//        "description": "Dinners",
-//        "amount": 50.0,
-//        "date": "2024-03-25",
-//        "paidBy": "Naitik",
-//        "group": "jaipur"
-//        }
