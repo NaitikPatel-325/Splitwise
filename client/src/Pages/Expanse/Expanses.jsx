@@ -3,7 +3,7 @@ import { Expanse } from './Components/Expanse';
 import { ExpanseHistory } from './Components/ExpanseHistory';
 import { useParams } from 'react-router-dom';
 
-export const Expanses = ({ match }) => {
+export const Expanses = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState('create');
 
@@ -16,7 +16,7 @@ export const Expanses = ({ match }) => {
       <div className="flex space-x-4 justify-center">
         <button
           className={`px-4 py-2 rounded-lg ${
-            activeTab === 'create' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+            activeTab === 'create' ? 'bg-green-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
           } transition duration-300`}
           onClick={() => handleTabClick('create')}
         >
@@ -24,7 +24,7 @@ export const Expanses = ({ match }) => {
         </button>
         <button
           className={`px-4 py-2 rounded-lg ${
-            activeTab === 'history' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+            activeTab === 'history' ? 'bg-green-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
           } transition duration-300`}
           onClick={() => handleTabClick('history')}
         >

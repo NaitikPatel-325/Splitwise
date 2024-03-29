@@ -3,7 +3,6 @@ package com.naitik.splitwise.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import com.naitik.splitwise.entity.Groups;
 import lombok.NoArgsConstructor;
 
@@ -34,6 +33,7 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "expanse_contributors",
@@ -43,14 +43,14 @@ public class User {
     private List<Expanse> contributedExpanses;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY ,cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY )
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_groups",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -107,8 +107,10 @@ public class User {
         return id;
     }
 
-    public List<Expanse> contributedExpanses() {
-
+    public List<Expanse> getContributedExpanses() {
+        if ( contributedExpanses == null) {
+            contributedExpanses = new ArrayList<>();
+        }
         return contributedExpanses;
     }
 

@@ -2,6 +2,7 @@ package com.naitik.splitwise.service;
 
 import com.naitik.splitwise.daojpa.ExpansesDao;
 import com.naitik.splitwise.entity.Expanse;
+import com.naitik.splitwise.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,9 @@ public class ExpanseService {
     @Autowired
     private ExpansesDao expansesDao;
 
+    @Autowired
+    private UserService userService;
+
     public Expanse createExpense(Expanse expanse) {
 
         return expansesDao.save(expanse);
@@ -23,10 +27,7 @@ public class ExpanseService {
         return expansesDao.findAllByGroupId(groupId);
     }
 
-    public Expanse getExpenseById(Long expenseId) {
 
-        return expansesDao.findById(expenseId).orElse(null);
-    }
 
     public Double getTotalExpensesForGroup(Long groupId) {
         System.out.println("Error in updating expense");
@@ -35,17 +36,21 @@ public class ExpanseService {
         return totalExpenses;
     }
 
-    public Expanse updateExpense(Long expenseId, Expanse updatedExpanse) {
-        Expanse existingExpense = expansesDao.findById(expenseId).orElse(null);
-        if (existingExpense != null) {
-            updatedExpanse.setId(expenseId);
-            return expansesDao.save(updatedExpanse);
-        }
-        return null;
-    }
 
-    public void deleteExpense(Long expenseId) {
+    public void deleteExpense(Long expenseId,List<User> contributors) {
+        for (User contributor : contributors) {
+            contributor.getContributedExpanses().removeIf(e -> e.getId().equals(expenseId));
+            userService.saveUser(contributor);
+        }
         expansesDao.deleteById(expenseId);
     }
 
+    public List<User> getContributors(Long expenseId) {
+        Expanse expanse = expansesDao.findById(expenseId).orElse(null);
+        return expanse.getContributors();
+    }
+
+    public List<Expanse> getExpanseByGroupId(int id) {
+        return expansesDao.findAllByGroupId((long) id);
+    }
 }

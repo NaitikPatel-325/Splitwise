@@ -20,7 +20,7 @@ export const Expanse = () => {
       }
     })
     .then(response => {
-      console.log('Group details:', response.data);
+      console.log('Group details:', response.data[0].id);
       setUsers(response.data);
     })
     .catch(error => {
@@ -43,12 +43,17 @@ export const Expanse = () => {
       return alert('Please fill all the fields');
     }
     else{
-      console.log('Expanse Name:', expanseName, 'Total Expenses:', totalExpenses, 'Date:', date, 'Selected Users:', selectedUsers);
-      axios.post('http://localhost:8080/create_expanse', {
-        expanseName,
-        totalExpenses,
-        date,
-        selectedUsers
+      console.log('Expanse Name:', expanseName, 'Total Expenses:', totalExpenses, 'Date:', date, 'Selected Users:', selectedUsers , id);
+      axios.post('http://localhost:8080/group/expanses', {
+        id: id,
+        description: expanseName,
+        amount:totalExpenses,
+        date:date,
+        users:selectedUsers
+      }, {
+        headers: {
+          Authorization: `Bearer ${jwt}`
+        }
       })
       .then(response => {
         console.log('Expanse created:', response.data);

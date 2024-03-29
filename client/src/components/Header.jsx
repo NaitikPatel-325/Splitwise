@@ -14,7 +14,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="dark:bg-zinc-950 dark:text-gray-100">
+    <header className="dark:bg-zinc-800  dark:text-gray-100">
       <div className="container flex justify-between items-center h-16 mx-auto">
         <a rel="noopener noreferrer" href="#" aria-label="Back to homepage" className="flex items-center p-2">
           {/* logo */}
@@ -32,7 +32,7 @@ export const Header = () => {
           </ul>
           {!isLoggedIn &&<div className="items-center flex-shrink-0 hidden lg:flex">
              <a href="/login"><button className="self-center px-8 py-3 rounded">Sign in</button></a>
-            <a href="/signup"><button className="self-center px-8 py-3 font-semibold rounded dark:bg-violet-400 dark:text-gray-900">Sign up</button></a>
+            <a href="/signup"><button className="self-center px-8 py-3 font-semibold rounded dark:bg-green-500 dark:text-gray-900">Sign up</button></a>
           </div>
           }
         </div>
@@ -43,7 +43,7 @@ export const Header = () => {
     <li><a rel="noopener noreferrer" href="/dashboard" className="block px-4 py-2 text-gray-900 dark:text-gray-100 hover:text-gray-600">dashboard</a></li>
     {isLoggedIn && <li><a rel="noopener noreferrer" href="/profile" className="block px-4 py-2 text-gray-900 dark:text-gray-100 hover:text-gray-600">Profile</a></li>}
     {!isLoggedIn && <li><a rel="noopener noreferrer" href="/login" className="block px-4 py-3 rounded text-white">Sign in</a></li>}
-    {!isLoggedIn && <li><a rel="noopener noreferrer" href="/signup" className="block px-4 py-3 font-semibold rounded w dark:bg-violet-400 dark:text-gray-900">Sign up</a></li>}
+    {!isLoggedIn && <li><a rel="noopener noreferrer" href="/signup" className="block px-4 py-3 font-semibold rounded w dark:bg-green-500 dark:text-gray-900">Sign up</a></li>}
   </ul>
 </div>
     </header>

@@ -32,6 +32,21 @@ export const AllGroups = () => {
     linkRef.current.click();
   };
 
+  const handleDeleteGroup = (groupId) => {
+    axios.delete(`http://localhost:8080/group/delete/${groupId}`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      }
+    })
+    .then(() => {
+      setGroups(groups.filter(group => group.id !== groupId));
+    })
+    .catch(error => {
+      console.error('Error deleting group:', error);
+    });
+    console.log(`Deleting group with ID ${groupId}`);
+  };
+
   return (
     <div className="flex-1 max-w-screen-md w-full mx-auto mb-2">
       <div className="overflow-x-auto">
@@ -42,6 +57,7 @@ export const AllGroups = () => {
               <th className="py-2 px-4">GroupName</th>
               <th className="py-2 px-4">Currency</th>
               <th className="py-2 px-4">Details</th>
+              <th className="py-2 px-4">Actions</th>  
             </tr>
           </thead>
           <tbody>
@@ -60,6 +76,9 @@ export const AllGroups = () => {
                     ref={linkRef}
                     style={{ display: 'none' }} 
                   />
+                </td>
+                <td className="py-2 px-4">
+                  <button onClick={() => handleDeleteGroup(group.id)} className="text-white bg-red-500 py-1 px-3 rounded-lg hover:bg-red-600 focus:outline-none focus:bg-red-600">Delete</button>
                 </td>
               </tr>
             ))}

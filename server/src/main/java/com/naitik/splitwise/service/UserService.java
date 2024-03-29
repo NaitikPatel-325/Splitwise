@@ -1,6 +1,7 @@
 package com.naitik.splitwise.service;
 
 import com.naitik.splitwise.daojpa.UserDao;
+import com.naitik.splitwise.entity.Expanse;
 import com.naitik.splitwise.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -75,5 +76,10 @@ public class UserService {
 
     public User getUserByUsername(String username) {
         return userDao.findByUsername(username);
+    }
+
+
+    public void saveUser(User contributor) {
+        userDao.save(contributor);
     }
 }

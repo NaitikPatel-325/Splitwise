@@ -4,20 +4,25 @@ import com.naitik.splitwise.entity.Expanse;
 import com.naitik.splitwise.entity.Groups;
 import com.naitik.splitwise.entity.User;
 import com.naitik.splitwise.payLoad.Request.ExpansesRequest;
+import com.naitik.splitwise.security.services.UserDetailsImpl;
 import com.naitik.splitwise.service.ExpanseService;
 import com.naitik.splitwise.service.GroupService;
 import com.naitik.splitwise.service.UserService;
+import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/group/expanses")
 public class ExpansesController {
 
@@ -32,23 +37,37 @@ public class ExpansesController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<Expanse> createExpense( @RequestHeader("Authorization") String request,@RequestBody ExpansesRequest expanse) {
-        if(expanse == null)
+    public ResponseEntity<Expanse> createExpense(@RequestHeader("Authorization") String request, @RequestBody ExpansesRequest expanse) {
+        System.out.println("Creating expense" + expanse);
+        if (expanse == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        else if (userService.getUserByUsername(expanse.getPaidBy()) == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+        User ur = userService.getUserById(userId);
+        Groups gr = GroupService.getGroupByIds(expanse.getId());
 
+        List<Integer> userIds = expanse.getUsers();
+        List<User> contributors = new ArrayList<>();
+        for (Integer u : userIds) {
+            if (u.equals(userId)) {
+                continue;
+            }
+            User user = userService.getUserById((long) u);
+            if (user != null) {
+                contributors.add(user);
+            }
         }
 
-        else if (GroupService.getGroupByName(expanse.getGroup()) == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        Expanse e = new Expanse(expanse.getDescription(), expanse.getAmount(), expanse.getDate(), ur, gr, contributors);
 
-        User ur = userService.getUserByUsername(expanse.getPaidBy());
-        Groups gr = GroupService.getGroupByName(expanse.getGroup());
-        Expanse e = new Expanse(expanse.getDescription(), expanse.getAmount(), expanse.getDate(),ur, gr);
         Expanse createdExpense = expanseService.createExpense(e);
+
+        for (User contributor : contributors) {
+            contributor.getContributedExpanses().add(createdExpense);
+            userService.saveUser(contributor);
+        }
+
         return new ResponseEntity<>(createdExpense, HttpStatus.CREATED);
     }
 
@@ -68,43 +87,29 @@ public class ExpansesController {
 
 
 
-    @GetMapping("/{expenseId}")
+    @GetMapping("/GetAllExpenses/{id}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<Expanse> getExpenseDetails(@RequestHeader("Authorization") String request,@PathVariable Long expenseId) {
-
-        Expanse expense = expanseService.getExpenseById(expenseId);
-        return new ResponseEntity<>(expense, HttpStatus.OK);
-    }
-
-    @PostMapping("/update/{expenseId}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-
-    public ResponseEntity<Expanse> updateExpense(@RequestHeader("Authorization") String request,@PathVariable Long expenseId, @RequestBody ExpansesRequest updatedExpanse) {
-        if(updatedExpanse == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        else if (userService.getUserByUsername(updatedExpanse.getPaidBy()) == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
+    public ResponseEntity<List<Expanse>> getExpenseDetails(@RequestHeader("Authorization") String request,@PathVariable int id) {
+        System.out.println("Getting all expenses for group" + id);
+        List<Expanse> expenses = expanseService.getAllExpensesForGroup((long)id);
+        for (Expanse e : expenses) {
+            System.out.println(e.getPaidBy().getId() );
         }
+        return new ResponseEntity<>(expenses, HttpStatus.OK);
+    }
 
-        else if (GroupService.getGroupByName(updatedExpanse.getGroup()) == null) {
+
+    @DeleteMapping("/DeleteExpense/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<HttpStatus> deleteExpense(@RequestHeader("Authorization") String request, @PathVariable String id) {
+        try {
+            Long expenseId = Long.parseLong(id);
+            List<User> contributors = expanseService.getContributors(expenseId);
+
+            expanseService.deleteExpense(expenseId,contributors);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NumberFormatException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        User UR = userService.getUserByUsername(updatedExpanse.getPaidBy());
-        Groups GR = GroupService.getGroupByName(updatedExpanse.getGroup());
-        Expanse UE = new Expanse(updatedExpanse.getDescription(), updatedExpanse.getAmount(), updatedExpanse.getDate(),UR,GR);
-        Expanse updatedExpense = expanseService.updateExpense(expenseId, UE);
-        return new ResponseEntity<>(updatedExpense, HttpStatus.OK);
     }
-
-
-    @DeleteMapping("/delete/{expenseId}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<HttpStatus> deleteExpense(@RequestHeader("Authorization") String request,@PathVariable Long expenseId) {
-        expanseService.deleteExpense(expenseId);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-
 }

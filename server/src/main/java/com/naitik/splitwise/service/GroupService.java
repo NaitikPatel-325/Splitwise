@@ -3,7 +3,6 @@ package com.naitik.splitwise.service;
 import com.naitik.splitwise.daojpa.GroupDao;
 import com.naitik.splitwise.entity.Groups;
 import com.naitik.splitwise.entity.User;
-import com.naitik.splitwise.payLoad.Request.GroupRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,18 +39,11 @@ public class GroupService {
         groupDao.save(group);
     }
 
-    public Object getGroups(User user) {
+    public List<Groups> getGroups(User user) {
         return user.getGroups();
     }
 
-    public Object getGroup(User user, int id) {
-        for (Groups group : user.getGroups()) {
-            if (group.getId() == id) {
-                return group;
-            }
-        }
-        return null;
-    }
+
 
     public Object getGroupMembers(User user, int id) {
         for (Groups group : user.getGroups()) {
@@ -62,20 +54,12 @@ public class GroupService {
         return null;
     }
 
-    public List<User> getGroupMember(Long id) {
-        return groupDao.findById(id.intValue()).orElse(null).getUsers();
+    public Groups getGroupByIds(int groupId) {
+        return groupDao.findById(groupId).orElse(null);
     }
 
-    public Groups getGroupByName(String name) {
-        return groupDao.findByGroupName(name);
-    }
-
-    public boolean getGroupById(Long groupId) {
-        return groupDao.existsById(groupId);
-    }
-
-    public Object deleteGroup(User user, int id) {
-                groupDao.deleteById(id);
+    public Object deleteGroup(int id) {
+        groupDao.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

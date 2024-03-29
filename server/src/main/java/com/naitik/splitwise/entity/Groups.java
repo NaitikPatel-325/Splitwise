@@ -24,14 +24,16 @@ public class Groups {
     private String Currency;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "groups",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "groups",fetch = FetchType.LAZY)
     private List<User> users;
 
     public String Currency() {
         return Currency;
     }
 
-
+    public String getCurrency() {
+        return Currency;
+    }
     public void setUsers(List<User> users) {
         this.users = users;
     }

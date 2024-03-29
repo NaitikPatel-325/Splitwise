@@ -1,10 +1,13 @@
 package com.naitik.splitwise.controller;
 
+import com.naitik.splitwise.daojpa.ExpansesDao;
+import com.naitik.splitwise.entity.Expanse;
 import com.naitik.splitwise.entity.Groups;
 import com.naitik.splitwise.entity.User;
 import com.naitik.splitwise.payLoad.Request.GroupRequest;
 import com.naitik.splitwise.payLoad.Response.MessageResponse;
 import com.naitik.splitwise.security.services.UserDetailsImpl;
+import com.naitik.splitwise.service.ExpanseService;
 import com.naitik.splitwise.service.GroupService;
 import com.naitik.splitwise.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -24,6 +29,9 @@ public class GroupController {
 
     @Autowired
     private GroupService groupService;
+
+    @Autowired
+    private ExpanseService expanseService;
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
@@ -81,17 +89,7 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getGroups(user));
     }
 
-    @GetMapping("/get/{id}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<?> getGroup(@RequestHeader("Authorization") String request, @PathVariable int id) {
-        System.out.println("GroupController.getGroup");
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long userId = userDetails.getId();
-        User user = userService.getUserById(userId);
-        System.out.println("GroupController.getGroup: user = " + user);
-        return ResponseEntity.ok(groupService.getGroup(user, id));
-    }
 
     @GetMapping("/member")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
@@ -110,11 +108,23 @@ public class GroupController {
     public ResponseEntity<?> deleteGroup(@RequestHeader("Authorization") String request, @PathVariable int id) {
         System.out.println("GroupController.deleteGroup");
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long userId = userDetails.getId();
-        User user = userService.getUserById(userId);
-        System.out.println("GroupController.deleteGroup: user = " + user);
-        return ResponseEntity.ok(groupService.deleteGroup(user, id));
+        Groups gp = groupService.getGroupByIds(id);
+
+        List<User> users = gp.getUsers();
+        for (User u : users) {
+            u.getGroups().remove(gp);
+            userService.saveUser(u);
+        }
+
+        List<Expanse> expanse = expanseService.getExpanseByGroupId(id);
+
+        for (Expanse e : expanse) {
+            expanseService.deleteExpense(e.getId(), e.getContributors());
+        }
+
+        groupService.deleteGroup(id);
+
+        return ResponseEntity.ok(new MessageResponse("Group deleted successfully"));
     }
 
 }
