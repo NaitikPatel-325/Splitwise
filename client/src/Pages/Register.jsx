@@ -1,5 +1,8 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 
 export const Register = () => {
@@ -9,14 +12,11 @@ export const Register = () => {
   const [user, setUser] = useState('');
   
     const handleRegister = (e) => {
-      if(password !== confirmPassword){
-        alert("Passwords do not match");
-
-      }
+      e.preventDefault(); 
+      if (password !== confirmPassword) {
+        toast.error("Password does not match with confirm password! Please try again.");
+      }      
       else{
-
-        e.preventDefault(); 
-    
         axios.post('http://localhost:8080/user/signup', {
           email: email,
           password: password,
@@ -25,6 +25,7 @@ export const Register = () => {
         })
         .then(response => {
           console.log(response.data);
+          window.location.href = "/login";
         })
         .catch(error => {
           console.log(error);
@@ -53,29 +54,29 @@ export const Register = () => {
                 <h3 className="font-semibold text-2xl text-gray-800">Sign Up </h3>
               </div>
               <div className="space-y-5">
-                <form onSubmit={handleRegister} method='POST'>
+                <form onSubmit={handleRegister}>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 tracking-wide">Username</label>
                   <input
                       className=" w-full text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400"
-                      type="text" placeholder="Enter Your Username" onChange={(e)=>{setUser(e.target.value)}}/>
+                      type="text" placeholder="Enter Your Username" onChange={(e)=>{setUser(e.target.value)}} required/>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700 tracking-wide">Email</label>
-                    <input className=" w-full text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400" type="email" placeholder="mail@gmail.com" onChange={(e)=>{setEmail(e.target.value)}} />
+                    <input className=" w-full text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400" type="email" placeholder="mail@gmail.com" onChange={(e)=>{setEmail(e.target.value)}} required/>
                   </div>
                   
                   <div className="space-y-2">
                     <label className="mb-5 text-sm font-medium tracking-wide">
                       Password
                     </label>
-                    <input className="w-full content-center text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400" type="password" placeholder="Enter your password" onChange={(e)=>{setPassword(e.target.value)}} />
+                    <input className="w-full content-center text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400" type="password" placeholder="Enter your password" onChange={(e)=>{setPassword(e.target.value)}} required/>
                   </div>
                   <div className="space-y-2">
                     <label className="mb-5 text-sm font-medium text-gray-700 tracking-wide">
                       Confirm Password
                     </label>
-                    <input className="w-full content-center text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400" type="password" placeholder="Confirm your password" onChange={(e)=>{setConfirmPassword(e.target.value)}}/>
+                    <input className="w-full content-center text-base px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:border-green-400" type="password" placeholder="Confirm your password" onChange={(e)=>{setConfirmPassword(e.target.value)}} required/>
                   </div>
 
                   <div className="flex items-center justify-between mt-4 mb-4">
@@ -98,6 +99,8 @@ export const Register = () => {
           </div>
         </div>
       </div>
+      
+      <ToastContainer position="top-center" />
     </div>
   );
 };

@@ -17,8 +17,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -111,5 +114,25 @@ public class ExpansesController {
         } catch (NumberFormatException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/GetPerUser/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Double>> getContributors(@RequestHeader("Authorization") String request, @PathVariable String id) {
+        Long groupId = Long.parseLong(id);
+        List<Expanse> expenses = expanseService.getAllExpensesForGroup(groupId);
+        Map<String, Double> userAmountMap = new HashMap<>();
+        DecimalFormat df = new DecimalFormat("#.##");
+
+        for (Expanse e : expenses) {
+            List<User> contributors = e.getContributors();
+            double perHeadAmount = e.getAmount() / contributors.size();
+            for (User contributor : contributors) {
+                String username = contributor.getUsername();
+                double amount = userAmountMap.getOrDefault(username, 0.0) + perHeadAmount;
+                userAmountMap.put(username, Double.parseDouble(df.format(amount))); // Format the amount
+            }
+        }
+        return ResponseEntity.ok(userAmountMap);
     }
 }

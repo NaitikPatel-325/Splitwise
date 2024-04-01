@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import axios from 'axios';
+import { toast,ToastContainer } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import UserContext from '../../../context/create';
 
@@ -10,7 +11,10 @@ export const AllGroups = () => {
   const [groups, setGroups] = useState([]);
 
   useEffect(() => {
-    fetchGroups();
+    if(jwt !== '')
+      fetchGroups();
+    else 
+      toast.error('Please login to view groups');
   }, []);
 
   const fetchGroups = () => {
@@ -85,6 +89,7 @@ export const AllGroups = () => {
           </tbody>
         </table>
       </div>
+      <ToastContainer position='top-center'/>
     </div>
   );
 };

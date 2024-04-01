@@ -13,7 +13,7 @@ export const Expanses = () => {
 
   return (
     <div className="flex-1 max-w-screen-md w-full mx-auto mb-2 flex flex-col gap-6">
-      <div className="flex space-x-4 justify-center">
+      <div className="flex space-x-4 justify-center mt-4">
         <button
           className={`px-4 py-2 rounded-lg ${
             activeTab === 'create' ? 'bg-green-500 text-white' : 'bg-gray-200 hover:bg-gray-300'

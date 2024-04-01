@@ -10,7 +10,7 @@ import {Expanses} from '../Pages/Expanse/Expanses'
 export const AllRoutes = () => {
   return (
     <Routes>
-        <Route path = "/Home" element = {<Home />} />
+        <Route path = "/" element = {<Home />} />
         <Route path = "/login" element = {<Login />} />
         <Route path = "/signup" element = {< Register />} />
         <Route path = "/profile" element = {<Profile />} />

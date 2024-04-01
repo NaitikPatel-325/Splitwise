@@ -3,6 +3,9 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 export const Expanse = () => {
   const { id } = useParams();
@@ -40,7 +43,7 @@ export const Expanse = () => {
 
   const handleSubmit = () => {
     if(!expanseName || !totalExpenses || !date || selectedUsers.length === 0) {
-      return alert('Please fill all the fields');
+      toast.warning('Please fill in all the fields and select at least one user.');
     }
     else{
       console.log('Expanse Name:', expanseName, 'Total Expenses:', totalExpenses, 'Date:', date, 'Selected Users:', selectedUsers , id);
@@ -56,6 +59,7 @@ export const Expanse = () => {
         }
       })
       .then(response => {
+        toast.success('Expanse created successfully!');
         console.log('Expanse created:', response.data);
       })
       .catch(error => {
@@ -137,6 +141,7 @@ export const Expanse = () => {
           Cancel
         </button>
       </div>
+      <ToastContainer position="top-center" />
     </div>
   );
 };

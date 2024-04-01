@@ -1,6 +1,8 @@
 import React, { useState,useContext } from 'react';
 import axios from 'axios'; 
 import  UserContext  from '../../../context/create';
+import { toast,ToastContainer } from 'react-toastify';
+
 
 export const Group = () => {
 
@@ -18,7 +20,7 @@ export const Group = () => {
   const addParticipantInput = () => {
 
     if(jwt === ''){
-      alert('Please login to add participants');
+      toast.error('Please login to add participants');
     }
     else{
       setParticipants([...participants, '']);
@@ -64,7 +66,7 @@ export const Group = () => {
         return false;
       });
     } else {
-      alert('Please login to create a group');
+      toast.error('Please login to add participants');
     }
   }
   
@@ -154,7 +156,7 @@ export const Group = () => {
           </button>
         </div>
       </div>
-
+          <ToastContainer position='top-center'/>
     </div>
   );
 };

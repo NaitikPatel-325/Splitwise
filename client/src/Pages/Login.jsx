@@ -1,6 +1,8 @@
 import React,{useContext} from 'react';
 import axios from 'axios';
 import  UserContext  from '../context/create';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 export const Login = () => {
@@ -25,9 +27,10 @@ export const Login = () => {
       sessionStorage.setItem("jwt", response.data);
       Login(response.data.jwtToken, response.data.username);
       console.log(response.data);
-      window.location.href = "/home";
+      window.location.href = "/";
     })
     .catch(error => {
+      toast.error("Invalid username or password! Please try again.");
       console.error("Error logging in:", error);
     });
   }
@@ -93,6 +96,7 @@ export const Login = () => {
           </div>
         </div>
       </div>
+      <ToastContainer position='top-center'/>
     </div>
   );
 };
