@@ -1,64 +1,56 @@
-import React, { useEffect } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
 import UserContext from "./create";
-
+import axios from 'axios';
 
 export const UserContextProvider = ({ children }) => {
-  const [username, setUsername] = React.useState("");
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-  const [jwt, setJwt] = React.useState("");
+  const [user, setUser] = useState(() => {
+    const storedUser = sessionStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : {
+      fullname: "",
+      email: "",
+      picture: "",
+    };
+  });
 
-  const fetchUserData = () => {
-    const token = sessionStorage.getItem("jwt");
-    if (token) {
-      setJwt(token);
-  
-      axios
-        .get("http://localhost:8080/user/data", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-        .then(response => {
-          setUsername(response.data.username);
-          setIsLoggedIn(true);
-          console.log("User data fetched:", response.data);
-        })
-        .catch(error => {
-          console.error("Error fetching user data:", error);
-        });
-    }
-  };
-  
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return JSON.parse(sessionStorage.getItem('isLoggedIn')) || false;
+  });
 
   useEffect(() => {
-    fetchUserData();
-  }, []); 
+    const checkAuthentication = async () => {
+      try {
+        await axios.get('http://localhost:8080/api/user', { withCredentials: true });
+        setIsLoggedIn(true);
+      } catch (error) {
+        sessionStorage.removeItem('user');
+        sessionStorage.removeItem('isLoggedIn');
+        setUser({
+          fullname: "",
+          email: "",
+          picture: "",
+        });
+        setIsLoggedIn(false);
+      }
+    };  
 
-  const logout = () => {
-    sessionStorage.removeItem("jwt");
-    setUsername("");
-    setIsLoggedIn(false);
-    setJwt("");
-  };
+    checkAuthentication();
+  }, []);
 
-  const Login = (jwtToken, username) => {
-    sessionStorage.setItem("jwt", jwtToken);
-    setJwt(jwtToken);
-    setUsername(username);
-    setIsLoggedIn(true);
-    console.log(userContextValue);
-  };
+  useEffect(() => {
+    if (isLoggedIn) {
+      sessionStorage.setItem('user', JSON.stringify(user));
+      sessionStorage.setItem('isLoggedIn', JSON.stringify(isLoggedIn));
+    } else {
+      sessionStorage.removeItem('user');
+      sessionStorage.removeItem('isLoggedIn');
+    }
+  }, [user, isLoggedIn]);
 
   const userContextValue = {
-    username,
+    user,
+    setUser,
     isLoggedIn,
-    jwt,
-    Login,
-    logout,
-    setJwt,
     setIsLoggedIn,
-    setUsername
   };
 
   return (

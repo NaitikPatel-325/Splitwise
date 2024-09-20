@@ -1,56 +1,105 @@
 package com.naitik.splitwise.service;
 
-import com.naitik.splitwise.daojpa.ExpansesDao;
 import com.naitik.splitwise.entity.Expanse;
+import com.naitik.splitwise.dao.ExpanseDao;
+import com.naitik.splitwise.dao.GroupDao;
+import com.naitik.splitwise.dao.UserDAO;
 import com.naitik.splitwise.entity.User;
+import com.naitik.splitwise.requestService.ExpanseRequest;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 @Service
+@Transactional
 public class ExpanseService {
 
     @Autowired
-    private ExpansesDao expansesDao;
+    private ExpanseDao expanseRepository;
 
     @Autowired
-    private UserService userService;
+    private UserDAO userRepository;
 
-    public Expanse createExpense(Expanse expanse) {
+    @Autowired
+    private GroupDao groupRepository;
 
-        return expansesDao.save(expanse);
-    }
+    public Expanse addExpanse(ExpanseRequest expanseDTO) {
+        Expanse expanse = new Expanse();
+        expanse.setDescription(expanseDTO.getDescription());
+        expanse.setAmount(expanseDTO.getAmount());
+        expanse.setDate(expanseDTO.getDate());
+        expanse.setGroup(groupRepository.getReferenceById(expanseDTO.getId()));
+        System.out.println(expanse);
+        User paidBy = userRepository.findByEmail(expanseDTO.getUserEmail());
+        expanse.setPaidBy(paidBy);
 
-    public List<Expanse> getAllExpensesForGroup(Long groupId) {
+        for (Integer userId : expanseDTO.getUsers()) {
+            User contributor = userRepository.findById(Long.valueOf(userId))
+                    .orElseThrow(() -> new RuntimeException("Contributor not found with ID: " + userId));
+            expanse.getContributors().add(contributor);
 
-        return expansesDao.findAllByGroupId(groupId);
-    }
-
-
-
-    public Double getTotalExpensesForGroup(Long groupId) {
-        System.out.println("Error in updating expense");
-        List<Expanse> expenses = expansesDao.findAllByGroupId(groupId);
-        Double totalExpenses = expenses.stream().mapToDouble(Expanse::getAmount).sum();
-        return totalExpenses;
-    }
-
-
-    public void deleteExpense(Long expenseId,List<User> contributors) {
-        for (User contributor : contributors) {
-            contributor.getContributedExpanses().removeIf(e -> e.getId().equals(expenseId));
-            userService.saveUser(contributor);
+            contributor.getContributedExpanses().add(expanse);
         }
-        expansesDao.deleteById(expenseId);
+
+        return expanseRepository.save(expanse);
     }
 
-    public List<User> getContributors(Long expenseId) {
-        Expanse expanse = expansesDao.findById(expenseId).orElse(null);
-        return expanse.getContributors();
+    public void deleteExpanse(Long expanseId) {
+        Expanse expanse = expanseRepository.findById(expanseId)
+                .orElseThrow(() -> new EntityNotFoundException("Expanse not found"));
+
+        for (User contributor : expanse.getContributors()) {
+            contributor.getContributedExpanses().remove(expanse);
+        }
+
+        if (expanse.getGroup() != null) {
+            expanse.getGroup().getExpanses().remove(expanse);
+        }
+
+        expanseRepository.delete(expanse);
     }
 
-    public List<Expanse> getExpanseByGroupId(int id) {
-        return expansesDao.findAllByGroupId((long) id);
+
+
+    public List<Expanse> getAllExpensesByGroupId(Long userId) {
+        return expanseRepository.findByGroupId(userId);
     }
+
+    public List<Map<String, Object>> getExpensesPerUser(Long groupId) {
+        List<Expanse> expanses = expanseRepository.findByGroupId(groupId);
+
+        Map<String, Double> userExpenses = new HashMap<>();
+
+        for (Expanse expanse : expanses) {
+            double amount = expanse.getAmount();
+            List<User> contributors = expanse.getContributors();
+
+            if (contributors != null && !contributors.isEmpty()) {
+                double splitAmount = amount / contributors.size();
+
+                for (User contributor : contributors) {
+                    userExpenses.merge(contributor.getFullname(), splitAmount, Double::sum);
+                }
+            }
+        }
+
+        return userExpenses.entrySet()
+                .stream()
+                .map(entry -> {
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("username", entry.getKey());
+                    result.put("amount", entry.getValue());
+                    return result;
+                })
+                .collect(Collectors.toList());
+    }
+
+
 }

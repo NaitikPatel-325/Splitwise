@@ -1,52 +1,53 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { toast,ToastContainer } from 'react-toastify';
-import { Link } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import UserContext from '../../../context/create';
 
 export const AllGroups = () => {
-  const { jwt } = useContext(UserContext);
-  const linkRef = useRef();
+  const { isLoggedIn, user } = useContext(UserContext);
+  const navigate = useNavigate();
 
   const [groups, setGroups] = useState([]);
 
   useEffect(() => {
-    if(jwt !== '')
+    if (isLoggedIn) {
       fetchGroups();
-    else 
+    } else {
       toast.error('Please login to view groups');
-  }, []);
+    }
+  }, [isLoggedIn]);
 
   const fetchGroups = () => {
-    axios.get('http://localhost:8080/group/get', {
-      headers: {
-        Authorization: `Bearer ${jwt}`
-      }
+    const userEmail = user.email;
+
+    axios.get(`http://localhost:8080/api/get?email=${encodeURIComponent(userEmail)}`, {
+      withCredentials: true,
     })
-      .then(response => {
-        setGroups(response.data);
-        console.log('Groups:', response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching groups:', error);
-      });
+    .then(response => {
+      setGroups(response.data);
+      console.log('Groups:', response.data);
+    })
+    .catch(error => {
+      console.error('Error fetching groups:', error);
+    });
   };
 
   const handleDetailsClick = (groupId) => {
-    linkRef.current.click();
+    navigate(`/group/${groupId}`, { groupId }); 
   };
 
   const handleDeleteGroup = (groupId) => {
-    axios.delete(`http://localhost:8080/group/delete/${groupId}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`
-      }
+    axios.delete(`http://localhost:8080/api/delete/${groupId}`, {
+      withCredentials: true,
     })
     .then(() => {
       setGroups(groups.filter(group => group.id !== groupId));
+      toast.success('Group deleted successfully');
     })
     .catch(error => {
       console.error('Error deleting group:', error);
+      toast.error('Error deleting group');
     });
     console.log(`Deleting group with ID ${groupId}`);
   };
@@ -58,7 +59,7 @@ export const AllGroups = () => {
           <thead>
             <tr className="bg-gray-800 text-white">
               <th className="py-2 px-4">No</th>
-              <th className="py-2 px-4">GroupName</th>
+              <th className="py-2 px-4">Group Name</th>
               <th className="py-2 px-4">Currency</th>
               <th className="py-2 px-4">Details</th>
               <th className="py-2 px-4">Actions</th>  
@@ -71,18 +72,20 @@ export const AllGroups = () => {
                 <td className="py-2 px-4">{group.groupName}</td>
                 <td className="py-2 px-4">{group.currency}</td>
                 <td className="py-2 px-4">
-                  <button onClick={() => handleDetailsClick(group.id)} className="text-white bg-blue-500 py-1 px-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600">Details</button>
-                  <Link
-                    to={{
-                      pathname: `/group/${group.id}`,
-                      state: { groupId: group.id }
-                    }}
-                    ref={linkRef}
-                    style={{ display: 'none' }} 
-                  />
+                  <button 
+                    onClick={() => handleDetailsClick(group.id)} 
+                    className="text-white bg-blue-500 py-1 px-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                  >
+                    Details
+                  </button>
                 </td>
                 <td className="py-2 px-4">
-                  <button onClick={() => handleDeleteGroup(group.id)} className="text-white bg-red-500 py-1 px-3 rounded-lg hover:bg-red-600 focus:outline-none focus:bg-red-600">Delete</button>
+                  <button 
+                    onClick={() => handleDeleteGroup(group.id)} 
+                    className="text-white bg-red-500 py-1 px-3 rounded-lg hover:bg-red-600 focus:outline-none focus:bg-red-600"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}

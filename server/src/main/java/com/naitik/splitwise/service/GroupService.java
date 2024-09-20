@@ -1,65 +1,62 @@
 package com.naitik.splitwise.service;
 
-import com.naitik.splitwise.daojpa.GroupDao;
-import com.naitik.splitwise.entity.Groups;
+import com.naitik.splitwise.dao.GroupDao;
+import com.naitik.splitwise.dao.UserDAO;
+import com.naitik.splitwise.entity.Group;
 import com.naitik.splitwise.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@Transactional
 public class GroupService {
-
     @Autowired
     private GroupDao groupDao;
 
+    @Autowired
+    private UserDAO userRepository;
 
-    public ResponseEntity<Groups> addGroup(Groups group) {
-        try {
-            Groups savedGroup = groupDao.save(group);
-            return new ResponseEntity<>(savedGroup, HttpStatus.CREATED);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error in adding group");
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
+    @Autowired
+    private GroupDao groupRepository;
 
-    public void addUserToGroup(User user, Groups group) {
-        if (group.getUsers() == null)
-            group.setUsers(new ArrayList<>());
-        if (user.getGroups() == null)
-            user.setGroups(new ArrayList<>());
-        group.getUsers().add(user);
-        user.getGroups().add(group);
-        groupDao.save(group);
-    }
+    public void createGroup(Group group, List<String> participants) {
+        Group savedGroup = groupRepository.save(group);
 
-    public List<Groups> getGroups(User user) {
-        return user.getGroups();
-    }
-
-
-
-    public Object getGroupMembers(User user, int id) {
-        for (Groups group : user.getGroups()) {
-            if (group.getId() == id) {
-                return group.getUsers();
+        for (String email : participants) {
+            User user = userRepository.findByEmail(email);
+            System.out.println(user);
+            if (user != null) {
+                user.getGroups().add(savedGroup);
+                userRepository.save(user);
             }
         }
-        return null;
     }
 
-    public Groups getGroupByIds(int groupId) {
-        return groupDao.findById(groupId).orElse(null);
+    public Optional<Group> findGroupById(Long id) {
+        return groupDao.findById(id);
     }
 
-    public Object deleteGroup(int id) {
-        groupDao.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public List<Group> findGroupsByUserEmail(String email) {
+        return groupDao.findByUsersEmail(email);
     }
+
+    public boolean deleteGroup(Long groupId) {
+        Optional<Group> groupOptional = groupRepository.findById(groupId);
+        if (groupOptional.isPresent()) {
+            Group group = groupOptional.get();
+
+            group.removeUsersFromGroup();
+            groupRepository.save(group);
+            groupRepository.delete(group);
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

@@ -1,35 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect ,useContext} from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import UserContext from '../../../context/create';
 
 
 export const Expanse = () => {
+  const { isLoggedIn , user} = useContext(UserContext);
   const { id } = useParams();
-  const [expanseName, setExpanseName] = useState('');
+  const [expanseName,   setExpanseName] = useState('');
   const [totalExpenses, setTotalExpenses] = useState('');
   const [date, setDate] = useState(new Date());
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const jwt = sessionStorage.getItem('jwt');
 
   useEffect(() => {
-    axios.get(`http://localhost:8080/group/member?id=${id}`, {
-      headers: {
-        Authorization: `Bearer ${jwt}`
-      }
+    axios.get(`http://localhost:8080/api/member?id=${id}`, {
+      withCredentials:true
     })
     .then(response => {
-      console.log('Group details:', response.data[0].id);
+      console.log('Group details:', response.data[0].id,response.data);
       setUsers(response.data);
     })
     .catch(error => {
       console.error('Error:', error);
     });
-  }, [id, jwt]);
+  }, [id, isLoggedIn]);
 
   const handleCheckboxChange = (userId) => {
     setSelectedUsers(prevSelected => {
@@ -47,16 +46,15 @@ export const Expanse = () => {
     }
     else{
       console.log('Expanse Name:', expanseName, 'Total Expenses:', totalExpenses, 'Date:', date, 'Selected Users:', selectedUsers , id);
-      axios.post('http://localhost:8080/group/expanses', {
+      axios.post('http://localhost:8080/api/expanses', {
         id: id,
         description: expanseName,
         amount:totalExpenses,
         date:date,
-        users:selectedUsers
+        users:selectedUsers,
+        userEmail:user.email
       }, {
-        headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+        withCredentials:true
       })
       .then(response => {
         toast.success('Expanse created successfully!');
@@ -121,7 +119,7 @@ export const Expanse = () => {
                    onChange={() => handleCheckboxChange(user.id)} 
                    className="mr-2"
                  />
-                 <label htmlFor={user.id}>{user.username}</label>
+                 <label htmlFor={user.id}>{user.fullname}</label>
                </div>
              ))}
            </form>
