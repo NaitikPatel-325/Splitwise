@@ -7,7 +7,7 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Table(name = "user")
+@Table(name = "users")
 @Setter
 @Getter
 @AllArgsConstructor
