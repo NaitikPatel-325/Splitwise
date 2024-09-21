@@ -1,13 +1,15 @@
-FROM maven:3.8.7-eclipse-temurin-21 AS build
+FROM maven:3.8.7-openjdk-21-slim AS build
+WORKDIR /app
+
 COPY . .
 
-ENV JAVA_HOME=/opt/java/openjdk
-
 RUN mvn clean package -DskipTests
-FROM openjdk:21-jdk-slim
 
-COPY --from=build /app/target/Splitwise-0.0.1-SNAPSHOT.jar app.jar
+FROM openjdk:21-jdk-slim
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar /app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app.jar"]
