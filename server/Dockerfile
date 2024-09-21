@@ -1,20 +1,14 @@
-FROM eclipse-temurin:17-jdk-jammy AS build
-WORKDIR /app
+FROM maven:3.8.7-eclipse-temurin-17 AS build
+COPY . .
 
 ENV JAVA_HOME=/opt/java/openjdk
 
-COPY pom.xml .
-COPY src ./src
+RUN mvn clean package -DskipTests
 
-RUN ./mvnw clean package -DskipTests
-RUN chmod +x ./mvnw
-FROM eclipse-temurin:17-jdk-jammy
-WORKDIR /app
+FROM openjdk:17.0.1-jdk-slim
 
-ENV JAVA_HOME=/opt/java/openjdk
-
-COPY --from=build /app/target/*.jar /app.jar
+COPY --from=build /app/target/Splitwise-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
