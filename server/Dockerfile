@@ -7,7 +7,7 @@ COPY pom.xml .
 COPY src ./src
 
 RUN ./mvnw clean package -DskipTests
-
+RUN chmod +x ./mvnw
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 
