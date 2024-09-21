@@ -1,13 +1,19 @@
+FROM eclipse-temurin:17-jdk-jammy AS build
+WORKDIR /app
+
+ENV JAVA_HOME=/opt/java/openjdk
+
+COPY pom.xml .
+COPY src ./src
+
+RUN ./mvnw clean package -DskipTests
+
 FROM eclipse-temurin:17-jdk-jammy
+WORKDIR /app
 
-RUN groupadd -g 1000 mygroup && \
-    useradd -u 1000 -g mygroup -m myuser
+ENV JAVA_HOME=/opt/java/openjdk
 
-ARG JAR_FILE=target/*.jar
-
-COPY --chown=myuser:mygroup ${JAR_FILE} /app.jar
-
-USER myuser
+COPY --from=build /app/target/*.jar /app.jar
 
 EXPOSE 8080
 
